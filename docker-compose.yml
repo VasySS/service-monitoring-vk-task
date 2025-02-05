@@ -11,37 +11,35 @@ services:
     networks:
       - monitoring-net
 
-#   backend:
-#     build: ./backend
-#     environment:
-#       POSTGRES_HOST: postgres
-#       POSTGRES_USER: user
-#       POSTGRES_PASSWORD: password
-#       POSTGRES_DB: monitoring
-#     ports:
-#       - "8080:8080"
-#     depends_on:
-#       - postgres
-#     networks:
-#       - monitoring-net
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+    networks:
+      - monitoring-net
 
-#   frontend:
-#     build: ./frontend
-#     ports:
-#       - "3000:80"
-#     depends_on:
-#       - backend
-#     networks:
-#       - monitoring-net
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        ORIGIN: http://localhost:8081
+    ports:
+      - "8081:3000"
+    depends_on:
+      - backend
+    networks:
+      - monitoring-net
 
-#   pinger:
-#     build: ./pinger
-#     volumes:
-#       - /var/run/docker.sock:/var/run/docker.sock
-#     depends_on:
-#       - backend
-#     networks:
-#       - monitoring-net
+  # pinger:
+  #   build:
+  #     context: ./pinger
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - monitoring-net
 
 networks:
   monitoring-net:
