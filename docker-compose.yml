@@ -33,13 +33,13 @@ services:
     networks:
       - monitoring-net
 
-  # pinger:
-  #   build:
-  #     context: ./pinger
-  #   depends_on:
-  #     - backend
-  #   networks:
-  #     - monitoring-net
+  pinger:
+    build:
+      context: ./pinger
+    depends_on:
+      - backend
+    networks:
+      - monitoring-net
 
 networks:
   monitoring-net:
