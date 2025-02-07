@@ -1,30 +1,22 @@
 package main
 
 import (
-	"errors"
-	"log"
-	"net/http"
-	"time"
+	"context"
+	"log/slog"
+	"os/signal"
+	"syscall"
+
+	"github.com/VasySS/service-monitoring-vk-task/backend/internal/app"
+	"github.com/VasySS/service-monitoring-vk-task/backend/internal/config"
 )
 
 func main() {
-	r := http.NewServeMux()
+	config.MustInit()
 
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte("{\"status\": \"ok\"}"))
-	})
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
-	srv := &http.Server{
-		Addr:         "0.0.0.0:8082",
-		Handler:      r,
-		ReadTimeout:  time.Second * 10,
-		WriteTimeout: time.Second * 10,
-		IdleTimeout:  time.Second * 10,
-	}
-
-	if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-		log.Fatalf("failed to start http server: %v", err)
+	if err := app.Run(ctx); err != nil {
+		slog.Error("failed to run app", slog.Any("error", err))
 	}
 }
