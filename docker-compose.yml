@@ -29,6 +29,7 @@ services:
       context: ./frontend
       args:
         ORIGIN: http://localhost:8081
+        BACKEND_URL: http://backend:8082
     ports:
       - "8081:3000"
     depends_on:

@@ -3,8 +3,8 @@ package entity
 import "time"
 
 type ContainerStatus struct {
-	ContainerID string
-	IP          string
-	Status      string
-	CreatedAt   time.Time
+	ContainerID string    `json:"containerID"`
+	IP          string    `json:"ip"`
+	Status      string    `json:"status"`
+	CreatedAt   time.Time `json:"createdAt"`
 }

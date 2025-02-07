@@ -4,6 +4,11 @@ FROM node:22.13 AS builder
 ARG ORIGIN
 RUN if [ -z "$ORIGIN" ]; then echo "ERROR: ORIGIN is not set!"; exit 1; fi
 
+ARG BACKEND_URL
+RUN if [ -z "$BACKEND_URL" ]; then echo "ERROR: BACKEND_URL is not set!"; exit 1; fi
+
+ENV VITE_BACKEND_URL=$BACKEND_URL
+
 WORKDIR /app
 COPY package*.json ./
 
