@@ -1,5 +1,7 @@
 ## Запуск
 
+Переименовать .env.example в .env
+
 Из корня репозитория необходимо вызвать следующие команды для запуска контейнеров:
 
 ```
@@ -18,11 +20,11 @@ backend: http://localhost:8082
 
 Контейнеры:
 
-- pinger
-- backend
-- frontend
+- pinger (golang)
+- backend (golang)
+- frontend (svelte)
 - postgres
-- postgres-migrations
+- postgres-migrations (goose)
 
 Сначала запускается база данных postgres, к ней применяются миграции с помощью контейнера postgres-migrations.
 
@@ -30,4 +32,6 @@ backend: http://localhost:8082
 
 Запускается pinger, получает IP-адреса всех локальных контейнеров каждые 10 секунд и запускает 5 воркеров, которые пингуют полученные контейнеры. Когда все контейнеры будут пропингованы, результат отправится в backend.
 
-Также запускается frontend, который получает данные из backend и показывает их в виде таблицы.
+Также запускается frontend, который получает данные из backend и показывает их в виде таблицы:
+
+![frontend example](/img/frontend_example.png)
