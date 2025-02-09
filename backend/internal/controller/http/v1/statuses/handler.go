@@ -5,14 +5,16 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/VasySS/service-monitoring-vk-task/backend/internal/dto"
 	"github.com/VasySS/service-monitoring-vk-task/backend/internal/entity"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
 
 type Service interface {
 	NewContainerStatuses(ctx context.Context, statuses []entity.ContainerStatus) error
-	ContainerStatuses(ctx context.Context) ([]entity.ContainerStatus, error)
+	ContainerStatuses(ctx context.Context) ([]dto.ContainerStatusResponseDB, error)
 }
 
 type Handler struct {

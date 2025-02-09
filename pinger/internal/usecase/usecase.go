@@ -67,7 +67,7 @@ func getContainers() ([]string, error) {
 	return ips, nil
 }
 
-func sendPingResults(results []PingStatus) error {
+func sendPingResults(results []PingResult) error {
 	resBytes, err := json.Marshal(results)
 	if err != nil {
 		return fmt.Errorf("failed to marshal ping results: %w", err)

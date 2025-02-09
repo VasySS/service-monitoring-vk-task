@@ -1,12 +1,19 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
+	interface ContainerData {
+		ip: string;
+		status: string;
+		createdAt: string;
+		lastSuccess: string;
+	}
+
 	interface Props {
 		data: PageData;
 	}
 	let { data }: Props = $props();
 
-	let containerData = data.containerData;
+	let containerData = data.containerData as ContainerData[];
 	let error = data.error;
 </script>
 
@@ -22,28 +29,20 @@
 			<table class="min-w-full border-collapse bg-white">
 				<thead class="bg-gray-800 text-white">
 					<tr>
-						<th>ID</th>
 						<th>IP</th>
 						<th>Status</th>
 						<th>Created at</th>
+						<th>Last success</th>
 					</tr>
 				</thead>
 
 				<tbody class="divide-y divide-gray-400">
 					{#each containerData as container}
 						<tr class="transition-colors hover:bg-gray-500">
-							<td>{container.containerID.slice(0, 12)}</td>
 							<td>{container.ip}</td>
 							<td>{container.status}</td>
-							<td>{container.createdAt}</td>
-							<!-- <td>
-							{#if container.state === 'running'}
-								<span style="color: green;">●</span>
-							{:else}
-								<span style="color: red;">●</span>
-							{/if}
-							{container.state}
-						</td> -->
+							<td>{new Date(container.createdAt).toLocaleString()}</td>
+							<td>{new Date(container.lastSuccess).toLocaleString()}</td>
 						</tr>
 					{/each}
 				</tbody>

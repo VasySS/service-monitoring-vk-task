@@ -11,15 +11,22 @@ import (
 	"github.com/VasySS/service-monitoring-vk-task/pinger/internal/config"
 )
 
-type PingStatus struct {
+type ContainerStatus string
+
+const (
+	StatusUp   ContainerStatus = "up"
+	StatusDown ContainerStatus = "down"
+)
+
+type PingResult struct {
 	IP        string
-	Healthy   bool
+	Status    ContainerStatus
 	CreatedAt time.Time
 }
 
-func StartWorkers(containerIPs []string) []PingStatus {
+func StartWorkers(containerIPs []string) []PingResult {
 	inputCh := make(chan string)
-	outputCh := make(chan PingStatus)
+	outputCh := make(chan PingResult)
 
 	wg := &sync.WaitGroup{}
 
@@ -42,7 +49,7 @@ func StartWorkers(containerIPs []string) []PingStatus {
 		wg.Wait()
 	}()
 
-	results := make([]PingStatus, 0, len(containerIPs))
+	results := make([]PingResult, 0, len(containerIPs))
 	for res := range outputCh {
 		results = append(results, res)
 	}
@@ -50,7 +57,7 @@ func StartWorkers(containerIPs []string) []PingStatus {
 	return results
 }
 
-func worker(wg *sync.WaitGroup, inputCh <-chan string, outputCh chan<- PingStatus) {
+func worker(wg *sync.WaitGroup, inputCh <-chan string, outputCh chan<- PingResult) {
 	defer wg.Done()
 
 	for ip := range inputCh {
@@ -63,9 +70,9 @@ func worker(wg *sync.WaitGroup, inputCh <-chan string, outputCh chan<- PingStatu
 	}
 }
 
-func ping(ip string) (PingStatus, error) {
+func ping(ip string) (PingResult, error) {
 	if ip == "" {
-		return PingStatus{}, fmt.Errorf("ip is empty")
+		return PingResult{}, fmt.Errorf("ip is empty")
 	}
 
 	cmd := exec.Command("ping", "-c", "1", "-W", "2", ip)
@@ -73,25 +80,25 @@ func ping(ip string) (PingStatus, error) {
 
 	resp, err := cmd.CombinedOutput()
 	if err != nil {
-		return PingStatus{
+		return PingResult{
 			IP:        ip,
-			Healthy:   false,
+			Status:    StatusDown,
 			CreatedAt: createdAt,
 		}, err
 	}
 
 	respStr := string(resp)
 	if !strings.Contains(respStr, "1 received") || !strings.Contains(respStr, "0% packet loss") {
-		return PingStatus{
+		return PingResult{
 			IP:        ip,
-			Healthy:   false,
+			Status:    StatusDown,
 			CreatedAt: createdAt,
 		}, nil
 	}
 
-	return PingStatus{
+	return PingResult{
 		IP:        ip,
-		Healthy:   true,
+		Status:    StatusUp,
 		CreatedAt: createdAt,
 	}, nil
 }
