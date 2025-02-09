@@ -1,8 +1,6 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/spf13/viper"
 )
 
@@ -24,6 +22,4 @@ func MustInit() {
 	if err := viper.UnmarshalExact(&C); err != nil {
 		panic(err)
 	}
-
-	fmt.Println(C)
 }

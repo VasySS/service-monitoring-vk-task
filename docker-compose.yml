@@ -1,8 +1,6 @@
 services:
-  postgres_container:
+  postgres-container:
     image: postgres:17-alpine
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespassword
@@ -11,16 +9,34 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - monitoring-net
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  postgres-migrations:
+    restart: "no"
+    build:
+      context: ./backend/migrations
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=postgres://postgres:postgrespassword@postgres-container:5432/monitoring?sslmode=disable
+    command: ["up"]
+    networks:
+      - monitoring-net
+    depends_on:
+      postgres-container:
+        condition: service_healthy
   backend:
     build:
       context: ./backend
     environment:
-      - POSTGRES_URL=postgres://postgres:postgrespassword@postgres_container:5432?sslmode=disable
+      - POSTGRES_URL=postgres://postgres:postgrespassword@postgres-container:5432/monitoring?sslmode=disable
     ports:
       - "8082:8082"
     depends_on:
-      - postgres_container
+      postgres-migrations:
+        condition: service_completed_successfully
     networks:
       - monitoring-net
 
@@ -42,6 +58,8 @@ services:
       context: ./pinger
     environment:
       - BACKEND_URL=http://backend:8082
+      - WORKERS=5
+      - SCRAPE_INTERVAL_SEC=10
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     cap_add:

@@ -7,9 +7,12 @@ import (
 	"syscall"
 
 	"github.com/VasySS/service-monitoring-vk-task/pinger/internal/app"
+	"github.com/VasySS/service-monitoring-vk-task/pinger/internal/config"
 )
 
 func main() {
+	config.MustInit()
+
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
