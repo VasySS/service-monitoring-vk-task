@@ -1,5 +1,5 @@
 # build stage
-FROM node:22.13 AS builder
+FROM node:22.13-alpine AS builder
 
 ARG ORIGIN
 RUN if [ -z "$ORIGIN" ]; then echo "ERROR: ORIGIN is not set!"; exit 1; fi
@@ -11,30 +11,20 @@ ENV VITE_BACKEND_URL=$BACKEND_URL
 
 WORKDIR /app
 COPY package*.json ./
-
 RUN npm ci
-COPY . .
 
-RUN npm run build
+COPY . .
+RUN npm run build && npm prune --omit=dev
 
 # runtime stage
 FROM node:22.13-alpine
 
 WORKDIR /app
-COPY --from=builder /app/build ./build
-COPY package*.json ./
-
-RUN npm ci --omit=dev
-
-#RUN apt-get update && \
-#    apt-get install -y --no-install-recommends curl && \
-#    apt-get clean && \
-#    rm -rf /var/lib/apt/lists/*
+COPY --from=builder --chown=node:node /app/build ./build
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
-# HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "curl", "-f", "http://localhost:3000/health" ]
-
 EXPOSE 3000
-ENTRYPOINT [ "node", "./build" ]
+ENTRYPOINT [ "node", "build/index.js" ]
